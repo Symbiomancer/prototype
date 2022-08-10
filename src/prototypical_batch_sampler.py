@@ -30,6 +30,7 @@ class PrototypicalBatchSampler(object):
         self.iterations = iterations
 
         self.classes, self.counts = np.unique(self.labels, return_counts=True)
+        print("Self counts: ", self.counts)
         self.classes = torch.LongTensor(self.classes)
 
         # create a matrix, indexes, of dim: classes X max(elements per class)
@@ -51,22 +52,33 @@ class PrototypicalBatchSampler(object):
         '''
         spc = self.sample_per_class
         cpi = self.classes_per_it
+        
+        """
+
+        batch_size = spc * cpi
 
         for it in range(self.iterations):
+
+            batch = torch.ones(batch_size).long()
+            yield batch
+
+        """
+
+        for it in range(self.iterations):
+            #print("it: ", it)
             batch_size = spc * cpi
+            #print("batch size: ", batch_size)
             batch = torch.LongTensor(batch_size)
             c_idxs = torch.randperm(len(self.classes))[:cpi]
             for i, c in enumerate(self.classes[c_idxs]):
+                #print("i: ", i)
                 s = slice(i * spc, (i + 1) * spc)
                 # FIXME when torch.argwhere will exists
                 label_idx = torch.arange(len(self.classes)).long()[self.classes == c].item()
                 sample_idxs = torch.randperm(self.numel_per_class[label_idx])[:spc]
                 batch[s] = self.indexes[label_idx][sample_idxs]
             batch = batch[torch.randperm(len(batch))]
+            #print("batch: ", batch)
             yield batch
+        
 
-    def __len__(self):
-        '''
-        returns the number of iterations (episodes) per epoch
-        '''
-        return self.iterations

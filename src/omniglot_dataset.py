@@ -66,6 +66,7 @@ class OmniglotDataset(data.Dataset):
         self.x = list(self.x)
 
     def __getitem__(self, idx):
+        print("in get item. idx: ", idx)
         x = self.x[idx]
         if self.transform:
             x = self.transform(x)

@@ -50,8 +50,12 @@ def prototypical_loss(input, target, n_support):
     - n_support: number of samples to keep in account when computing
       barycentres, for each one of the current classes
     '''
+
+    #print("input: ", input)
     target_cpu = target.to('cpu')
     input_cpu = input.to('cpu')
+
+    #print("target cpu1 : ", target_cpu)
 
     def supp_idxs(c):
         # FIXME when torch will support where as np
@@ -64,10 +68,25 @@ def prototypical_loss(input, target, n_support):
     # assuming n_query, n_target constants
     n_query = target_cpu.eq(classes[0].item()).sum().item() - n_support
 
+    #print("classes: ", classes)
+    #print("shape labels: ", target_cpu.shape )
+    #print("n support: {}, n query: {}".format(n_support, n_query))
+
     support_idxs = list(map(supp_idxs, classes))
+
+    #print("target cpu2 : ", target_cpu)
+
+    #print("support idxs", support_idxs)
 
     prototypes = torch.stack([input_cpu[idx_list].mean(0) for idx_list in support_idxs])
     # FIXME when torch will support where as np
+
+    #print("target cpu: ", target_cpu)
+    #print("target_cpu shape: ", target_cpu.shape)
+    #print("map(target_cpu.eq(c)): ", list(map(lambda c: target_cpu.eq(c), classes)))
+    #print("map(target_cpu.eq(c)) shape: ", len(list(map(lambda c: target_cpu.eq(c), classes))))
+    #print("map(target_cpu.eq(c).nonzero()): ", list(map(lambda c: target_cpu.eq(c).nonzero(), classes)))
+    #print("Stack first arg: ", list(map(lambda c: target_cpu.eq(c).nonzero()[n_support:], classes)))
     query_idxs = torch.stack(list(map(lambda c: target_cpu.eq(c).nonzero()[n_support:], classes))).view(-1)
 
     query_samples = input.to('cpu')[query_idxs]

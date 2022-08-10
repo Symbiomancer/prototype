@@ -29,4 +29,6 @@ class ProtoNet(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
+        #print("x shape: ", x.shape)
+        #print("x: ", x)
         return x.view(x.size(0), -1)
